@@ -1,0 +1,55 @@
+body {
+    margin: 0px;
+    overflow: hidden;
+    font-family: "Helvetica Neue", Helvetica;
+    font-size: 14px;
+}
+
+.header {
+    margin-top: 20px;
+    margin-left: 20px;
+    font-size: 36px;
+    font-weight: 300;
+    display: block;
+    z-index: 1;
+    text-shadow: 0 1px 0 #fff;
+}
+
+.hint {
+    width: 1280px;
+    right: 0px;
+    color: rgb(153, 153, 153);
+    font-size: 12px;
+    padding-bottom: 20px;
+}
+
+#chart {
+    margin: auto;
+    width: 80%;
+    text-align: center;
+}
+
+.hr-style {
+    border: 0;
+    height: 2px;
+    width: 80%;
+    color: #E8E8E8;
+    background-color: #E8E8E8;
+}
+
+/*
+<div id="left_buttons" style="width: 20%; display: table-cell;"> Left </div>
+*/
+div.filter_buttons {
+    /*position: fixed;*/
+    /*top: 5px;*/
+    /*left: 5px;*/
+    /*display: table-cell;*/
+}
+
+div.filter_buttons div {
+    /*background-color: rgb(199, 200, 201);*/
+    padding: 3px;
+    margin: 7px;
+    cursor: pointer;
+}

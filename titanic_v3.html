@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Titanic</title>
+
+    <!-- ref: http://bl.ocks.org/nbremer/6052814 -->
+    <script type="text/javascript" src="http://d3js.org/d3.v3.js"></script>
+    <script type="text/javascript" src="http://d3js.org/d3.hexbin.v0.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.js"></script>
+
+    <!--<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">-->
+    <link rel="stylesheet" href="css/w3.css">
+
+    <style type="text/css">
+        body {
+            margin: 0px;
+            overflow: hidden;
+            font-family: "Helvetica Neue", Helvetica;
+            font-size: 14px;
+        }
+
+        .header {
+            margin-top: 20px;
+            margin-left: 20px;
+            font-size: 36px;
+            font-weight: 300;
+            display: block;
+            z-index: 1;
+            text-shadow: 0 1px 0 #fff;
+        }
+
+        .hint {
+            width: 1280px;
+            right: 0px;
+            color: rgb(153, 153, 153);
+            font-size: 12px;
+            padding-bottom: 20px;
+        }
+
+        #chart {
+            margin: auto;
+            width: 80%;
+            text-align: center;
+        }
+
+        .hr-style {
+            border: 0;
+            height: 2px;
+            width: 80%;
+            color: #E8E8E8;
+            background-color: #E8E8E8;
+        }
+
+        /*
+        <div id="left_buttons" style="width: 20%; display: table-cell;"> Left </div>
+        */
+        div.filter_buttons {
+            /*position: fixed;*/
+            /*top: 5px;*/
+            /*left: 5px;*/
+            /*display: table-cell;*/
+        }
+
+        div.filter_buttons div {
+            /*background-color: rgb(199, 200, 201);*/
+            padding: 3px;
+            margin: 7px;
+            cursor: pointer;
+        }
+
+    </style>
+    <script>
+        function draw(error, data) {
+            data = data.sort(function (a, b) {
+                return d3.ascending(a.Sex, b.Sex);
+            });
+
+            var color = []
+
+            // color by gender
+            for (var i = 0; i < d3.keys(data).length; i++) {
+                if (d3.values(data)[i].Sex == "male") {
+                    color.push("578399");
+                } else {
+                    color.push("E892C4");
+                }
+            }
+
+            // white to empty hexagon
+            for (var j = i; j < 900; j++) {
+                color.push("white")
+            }
+
+            // initiate SVG and create hexagon centers
+
+            //svg sizes and margins
+            var margin = {
+                top: 15,
+                right: 0,
+                bottom: 0,
+                left: 15
+            };
+
+            var width = 850;
+            var height = 300;
+
+            // the number of columns and rows
+            var MapColumns = 45,
+                    MapRows = 20;
+
+            // the maximum radius the hexagons can have to still fit the screen
+            var hexRadius = d3.min([width / ((MapColumns + 0.5) * Math.sqrt(3)),
+                height / ((MapRows + 1 / 3) * 1.5)]);
+
+            // set the new height and width of the SVG based on the max possible
+            width = MapColumns * hexRadius * Math.sqrt(3);
+            heigth = MapRows * 1.5 * hexRadius + 0.5 * hexRadius;
+
+            // set the hexagon radius
+            var hexbin = d3.hexbin()
+                    .radius(hexRadius);
+
+            // calculate the center positions of each hexagon
+            var points = [];
+            for (var i = 0; i < MapRows; i++) {
+                for (var j = 0; j < MapColumns; j++) {
+                    points.push([hexRadius * j * 1.75, hexRadius * i * 1.5]);
+                }
+            }
+
+            // create SVG element
+            var svg = d3.select("#chart").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // draw hexagons and color them
+
+            //Start drawing the hexagons
+            svg.append("g")
+                    .selectAll(".hexagon")
+                    .data(hexbin(points))
+                    .enter().append("path")
+                    .attr("class", "hexagon")
+                    .attr("d", function (d) {
+                        return "M" + d.x + "," + d.y + hexbin.hexagon();
+                    })
+                    .attr("stroke", function (d, i) {
+                        return "#fff";
+                    })
+                    .attr("stroke-width", "1px")
+                    .style("fill", function (d, i) {
+                        return color[i];
+                    })
+            ;
+
+            function key_func(d) {
+                return d['key'];
+            }
+
+            function update(field) {
+                if (field == 'Sex+Survived') {
+                    // http://jsfiddle.net/RFontana/bZX7Q/
+                    function compareValues(a, b) {
+                        return a.Survived - b.Survived;
+                    }
+
+                    var nested = d3.nest()
+                            .key(function (d) {
+                                return d.Sex;
+                            })
+                            .sortKeys(d3.ascending)
+                            .sortValues(compareValues)
+                            .entries(data);
+                    var filtered = nested.reduce(function (a, b) {
+                        return a.concat(b.values);
+                    }, []);
+
+                } else {
+                    var filtered = data.sort(function (a, b) {
+                        return d3.ascending(eval("a." + field), eval("b." + field));
+                    });
+                }
+
+                var hexagons = svg.selectAll('hexagon')
+                        .data(filtered, key_func);
+
+                hexagons.exit().remove();
+
+                color = [];
+                for (var i = 0; i < d3.keys(filtered).length; i++) {
+                    if (field == 'Sex+Survived') {
+                        if (d3.values(filtered)[i].Sex == "male") {
+                            if (d3.values(filtered)[i].Survived == "1") {
+                                color.push("578399");
+                            } else {
+                                color.push("9BDAF6");
+                            }
+                        } else {
+                            if (d3.values(filtered)[i].Survived == "1") {
+                                color.push("E892C4");
+                            } else {
+                                color.push("FFCBE0");
+                            }
+                        }
+                    } else if (field == 'Sex') {
+                        if (d3.values(filtered)[i].Sex == "male") {
+                            color.push("578399");
+                        } else {
+                            color.push("E892C4");
+                        }
+                    } else if (field == 'Survived') {
+                        if (d3.values(filtered)[i].Survived == "1") {
+                            color.push("green");
+                        } else {
+                            color.push("black");
+                        }
+                    }
+                }
+
+                for (var j = i; j < 900; j++) {
+                    color.push("white")
+                }
+
+//                hexagons = null;
+
+                // start drawing the hexagons
+                hexagons.enter()
+                        .append("hexagon")
+                        .data(hexbin(points))
+                        .enter().append("path")
+                        .attr("class", "hexagon")
+                        .attr("d", function (d) {
+                            return "M" + d.x + "," + d.y + hexbin.hexagon();
+                        })
+                        .attr("stroke", function (d, i) {
+                            return "#fff";
+                        })
+                        .attr("stroke-width", "1px")
+                        .style("fill", function (d, i) {
+                            return color[i];
+                        })
+            }
+
+
+            var fields = ['Sex', 'Survived', 'Sex+Survived'];
+            var field_idx = 0;
+
+            var field_interval = setInterval(function () {
+                field_idx++;
+
+                if (field_idx >= fields.length) {
+                    clearInterval(field_interval);
+
+                    var buttons = d3.select("#panel_button")
+                            .append("div")
+                            .selectAll("div")
+                            .data(fields)
+                            .enter()
+                            .append("button")
+                            .attr("class", "w3-btn w3-round w3-dark-grey")
+                            .style("width", "100%")
+                            .style("margin", "1px")
+                            .attr("id", function (d) {
+                                return "Button" + d;
+                            })
+                            .text(function (d) {
+                                return d;
+                            });
+
+                    d3.select("#ButtonSex")
+                            .style("font-weight", "bold");
+
+                    if (field_idx == 1) {
+                        buttons.style("font-weight", "bold");
+                    }
+
+                    buttons.on("click", function (d) {
+                        d3.select("#panel_button")
+                                .selectAll("button")
+                                .transition()
+                                .duration(500)
+                                .style("color", "white")
+                                .style("font-weight", "normal")
+                                .style("background", "#000");
+
+                        d3.select(this)
+                                .transition()
+                                .duration(500)
+                                .style("background", "lightBlue")
+                                .style("color", "white")
+                                .style("font-weight", "bold");
+
+                        update(d);
+                    });
+                }
+            }, 1);
+        }
+    </script>
+
+</head>
+<body>
+
+<script type="text/javascript">
+    d3.csv("data/titanic_data.csv", draw);
+</script>
+
+<h1 style="text-align: center">Titanic</h1>
+<div style="width: 75%; margin: auto;">
+
+    <div id="panel_text">
+        <p><a href="https://pt.wikipedia.org/wiki/RMS_Titanic">RMS Titanic</a> was a British passenger liner that sank
+            in the North Atlantic Ocean in the early morning of 15 April 1912,
+            after colliding with an iceberg during her maiden voyage from Southampton to New York City. Of the 2,224
+            passengers and
+            crew aboard, more than 1,500 died, making it one of the deadliest commercial peacetime maritime disasters in
+            modern history.</p>
+        <p>The following database shows information from 891 of these passengers.</p>
+    </div>
+    <div id="panel" style="width: 15%; margin-top: 8px; float: left;">
+        <div id="panel_button"></div>
+        <div id="panel_infobox"></div>
+    </div>
+    <div id="chart" style="margin-left: 15%; width: 85%;"></div>
+    <div id="panel_video" style="text-align: center">
+    </div>
+</div>
+
+</body>
+</html>
