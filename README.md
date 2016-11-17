@@ -15,22 +15,19 @@ The general idea is to spatially visualize the numbers of survivors, dead, and g
 # Feedback
 
 * Feedback - titanic_v1.html:
-
-* no text informing what it means
-* include sex+survived option
-* on hover color incorrect
+    * no text informing what it means
+    * include sex+survived option
+    * on hover color incorrect
 
 * Feedback - titanic_v2.html:
-
-* no text informing what it means
-* on hover color incorrect
-                   * what colors mean?
+    * no text informing what it means
+    * on hover color incorrect
+    *  what colors mean?
 
 * Feedback - titanic_v3.html:
-
-* what colors mean? include a legend on mouse hover.
-* include data table overview
-* include a question to audience
+    * what colors mean? include a legend on mouse hover.
+    * include data table overview
+    * include a question to audience
 
 # Resources
 
