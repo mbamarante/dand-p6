@@ -5,12 +5,15 @@ after colliding with an iceberg during her maiden voyage from Southampton to New
 and crew aboard, more than 1,500 died, making it one of the deadliest commercial peacetime maritime disasters in
 modern history.
 
-The following database shows information from 891 of these passengers. It seems that the saying women and
-children first, worked. What do you think?
+The following database shows information from 891 of these passengers. It seems that the saying women first, worked. What do you think?
 
 # Design
 
-The general idea is to spatially visualize the numbers of survivors, dead, and gender, as quickly and easily as possible.
+The general idea is to spatially visualize the numbers of survivors, dead, and gender at a glance.
+
+In order to spatially visualize passengers, each of them must be represented in the view. Inspired by a Heat map composed of hexagons, each passenger is represented by a hexagon, varying in color what we want to represent: colors representing sex, reduction of brightness to represent the deaths or increase of brightness to represent survival. To make it easier for the user to understand, each hexagon has a caption, displayed by hovering over it, informing what is being represented (man, woman, survivor, etc.).
+
+The simple spatial visualization already gives us an idea of ​​the proportions (eg number of women in relation to the number of men, etc.). However, using a table that summarizes the data avoids ambiguities. If, however, the hexagons appear inordinately on the map, it will be more difficult to perceive the totality of each group. It is the reason why hexagons were grouped as the characteristic one wishes to show (e.g. in the view by sex, all women appear one after another, for only after beginning the exhibition of the men).
 
 # Feedback
 

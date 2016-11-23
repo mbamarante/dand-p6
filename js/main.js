@@ -98,7 +98,9 @@ function draw(error, data) {
         return d['key'];
     }
 
+    // refresh the screen as the user selects the options
     function update(field) {
+        // sort values
         if (field == 'Sex+Survived') {
             // http://jsfiddle.net/RFontana/bZX7Q/
             function compareValues(a, b) {
@@ -121,11 +123,16 @@ function draw(error, data) {
             });
         }
 
+        // creates hexagons according to the data
+        // each data point is correlated to one hexagon
         var hexagons = svg.selectAll('hexagon')
             .data(filtered, key_func);
 
+        // remove hexagons from earlier visualization
         hexagons.exit().remove();
 
+        // fill color, hint to each hexagon according to select option
+        // create an infobox with data overview
         color = [];
         hint = [];
         for (var i = 0; i < d3.keys(filtered).length; i++) {
@@ -135,7 +142,7 @@ function draw(error, data) {
                         color.push("578399");
                         hint.push("Survivor Male");
                     } else {
-                        color.push("9BDAF6");
+                        color.push("93C7DE");
                         hint.push("Perished Male");
                     }
                 } else {
@@ -154,15 +161,15 @@ function draw(error, data) {
                         "<tr><td>Count</td><td>577</td><td>314</td></tr>" +
                         "<tr><td>Survivor</td><td>109</td><td>233</td></tr>" +
                         "<tr><td>Casual.</td><td>468</td><td>81</td></tr>" +
-                        "<tr><td>Casual. %</td><td>18.9%</td><td>74.2%</td></tr>" +
+                        "<tr><td>Surv. %</td><td>18.9%</td><td>74.2%</td></tr>" +
                         "</table>");
 
             } else if (field == 'Sex') {
                 if (d3.values(filtered)[i].Sex == "male") {
-                    color.push("578399");
+                    color.push("6A9AB1");
                     hint.push("Male");
                 } else {
-                    color.push("E892C4");
+                    color.push("F099CC");
                     hint.push("Female");
                 }
 
@@ -175,10 +182,10 @@ function draw(error, data) {
 
             } else if (field == 'Survived') {
                 if (d3.values(filtered)[i].Survived == "1") {
-                    color.push("green");
+                    color.push("#b2b2b2");
                     hint.push("Survivor");
                 } else {
-                    color.push("black");
+                    color.push("#DFDFDF");
                     hint.push("Perished");
                 }
 
@@ -191,11 +198,10 @@ function draw(error, data) {
             }
         }
 
+        // set no color to remaining hexagons (with no data)
         for (var j = i; j < 900; j++) {
             color.push("white")
         }
-
-//                hexagons = null;
 
         // start drawing the hexagons
         hexagons.enter()
@@ -220,19 +226,22 @@ function draw(error, data) {
     }
 
 
-    var fields = ['Sex', 'Survived', 'Sex+Survived'];
-    var field_idx = 0;
+    // users options to filter data: by sex, survived or
+    // mixing sex and survived
+    var user_options = ['Sex', 'Survived', 'Sex+Survived'];
+    var user_options_idx = 0;
 
-    var field_interval = setInterval(function () {
-        field_idx++;
+    // create buttons to users options
+    var show_user_options = setInterval(function () {
+        user_options_idx++;
 
-        if (field_idx >= fields.length) {
-            clearInterval(field_interval);
+        if (user_options_idx >= user_options.length) {
+            clearInterval(show_user_options);
 
             var buttons = d3.select("#panel_button")
                 .append("div")
                 .selectAll("div")
-                .data(fields)
+                .data(user_options)
                 .enter()
                 .append("button")
                 .attr("class", "w3-btn w3-round w3-dark-grey")
@@ -248,10 +257,12 @@ function draw(error, data) {
             d3.select("#ButtonSex")
                 .style("font-weight", "bold");
 
-            if (field_idx == 1) {
+            if (user_options_idx == 1) {
                 buttons.style("font-weight", "bold");
             }
 
+            // add onclick event to change appearance and call update to refresh screen
+            // set bold to selected button label
             buttons.on("click", function (d) {
                 d3.select("#panel_button")
                     .selectAll("button")
